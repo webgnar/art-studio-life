@@ -52,6 +52,30 @@ const fastify = Fastify({ logger: { level: 'error' } })
 
 fastify.register(cors)
 fastify.register(compress)
+
+// Register static files BEFORE the catch-all route
+fastify.register(statics, {
+  root: assetsDir,
+  prefix: '/assets/',
+  decorateReply: false,
+  setHeaders: res => {
+    // all assets are hashed & immutable so we can use aggressive caching
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable') // 1 year
+    res.setHeader('Expires', new Date(Date.now() + 31536000000).toUTCString()) // older browsers
+  },
+})
+fastify.register(statics, {
+  root: path.join(__dirname, 'public'),
+  prefix: '/',
+  decorateReply: false,
+  setHeaders: res => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+    res.setHeader('Pragma', 'no-cache')
+    res.setHeader('Expires', '0')
+  },
+})
+
+// Catch-all route for the SPA - this should be LAST
 fastify.get('/', async (req, reply) => {
   const title = world.settings.title || 'World'
   const desc = world.settings.desc || ''
@@ -64,26 +88,6 @@ fastify.get('/', async (req, reply) => {
   html = html.replaceAll('{desc}', desc)
   html = html.replaceAll('{image}', image)
   reply.type('text/html').send(html)
-})
-fastify.register(statics, {
-  root: path.join(__dirname, 'public'),
-  prefix: '/',
-  decorateReply: false,
-  setHeaders: res => {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
-    res.setHeader('Pragma', 'no-cache')
-    res.setHeader('Expires', '0')
-  },
-})
-fastify.register(statics, {
-  root: assetsDir,
-  prefix: '/assets/',
-  decorateReply: false,
-  setHeaders: res => {
-    // all assets are hashed & immutable so we can use aggressive caching
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable') // 1 year
-    res.setHeader('Expires', new Date(Date.now() + 31536000000).toUTCString()) // older browsers
-  },
 })
 fastify.register(multipart, {
   limits: {
