@@ -179,11 +179,24 @@ export class PlayerLocal extends Entity {
   }
 
   getAvatarUrl() {
-    return this.data.sessionAvatar || this.data.avatar || 'asset://avatar.vrm'
+    // Temporarily disable avatar loading for deployment debugging
+    return null
+    // return this.data.sessionAvatar || this.data.avatar || 'asset://avatar.vrm'
   }
 
   applyAvatar() {
     const avatarUrl = this.getAvatarUrl()
+    if (!avatarUrl) {
+      console.log('Avatar disabled - running in first-person mode')
+      // Set default values for first-person mode
+      this.camHeight = 1.6 // Standard human eye height
+      this.nametag.position.y = 2.0
+      this.bubble.position.y = 2.0
+      if (!this.bubble.active) {
+        this.nametag.active = true
+      }
+      return
+    }
     if (this.avatarUrl === avatarUrl) return
     this.world.loader
       .load('avatar', avatarUrl)

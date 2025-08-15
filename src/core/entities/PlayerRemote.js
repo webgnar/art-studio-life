@@ -94,6 +94,17 @@ export class PlayerRemote extends Entity {
 
   applyAvatar() {
     const avatarUrl = this.data.sessionAvatar || this.data.avatar || 'asset://avatar.vrm'
+    // Temporarily disable avatar loading for deployment debugging
+    if (avatarUrl === 'asset://avatar.vrm') {
+      console.log('Remote player avatar disabled - first-person mode')
+      // Set default values for first-person mode
+      this.nametag.position.y = 2.0
+      this.bubble.position.y = 2.0
+      if (!this.bubble.active) {
+        this.nametag.active = true
+      }
+      return
+    }
     if (this.avatarUrl === avatarUrl) return
     this.world.loader.load('avatar', avatarUrl).then(src => {
       if (this.avatar) this.avatar.deactivate()

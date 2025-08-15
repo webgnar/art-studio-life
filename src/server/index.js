@@ -79,12 +79,28 @@ fastify.register(statics, {
 fastify.get('/debug/avatar', async (req, reply) => {
   const avatarPath = path.join(assetsDir, 'avatar.vrm')
   const exists = await fs.exists(avatarPath)
+  let fileInfo = null
+  if (exists) {
+    const stats = await fs.stat(avatarPath)
+    const first100Bytes = await fs.readFile(avatarPath, { start: 0, end: 99 })
+    fileInfo = {
+      size: stats.size,
+      firstBytesAsText: first100Bytes.toString('utf8'),
+      firstBytesAsHex: first100Bytes.toString('hex').substring(0, 40)
+    }
+  }
   return { 
     exists, 
     path: avatarPath,
     assetsDir,
     assetsUrl: world.assetsUrl,
-    resolvedUrl: world.resolveURL('asset://avatar.vrm')
+    resolvedUrl: world.resolveURL('asset://avatar.vrm'),
+    fileInfo,
+    environment: {
+      NODE_ENV: process.env.NODE_ENV,
+      PORT: process.env.PORT,
+      WORLD: process.env.WORLD
+    }
   }
 })
 
