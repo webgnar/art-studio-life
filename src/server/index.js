@@ -75,6 +75,19 @@ fastify.register(statics, {
   },
 })
 
+// Debug route to test asset access
+fastify.get('/debug/avatar', async (req, reply) => {
+  const avatarPath = path.join(assetsDir, 'avatar.vrm')
+  const exists = await fs.exists(avatarPath)
+  return { 
+    exists, 
+    path: avatarPath,
+    assetsDir,
+    assetsUrl: world.assetsUrl,
+    resolvedUrl: world.resolveURL('asset://avatar.vrm')
+  }
+})
+
 // Catch-all route for the SPA - this should be LAST
 fastify.get('/', async (req, reply) => {
   const title = world.settings.title || 'World'
