@@ -703,14 +703,14 @@ export class PlayerLocal extends Entity {
       const zeroAngular = v4.set(0, 0, 0)
       this.capsule.setAngularVelocity(zeroAngular.toPxVec3())
 
-      // if not in build mode, cancel flying
-      if (!this.world.builder?.enabled) {
+      // if not in build mode AND we have an avatar, cancel flying
+      if (!this.world.builder?.enabled && this.avatar) {
         this.toggleFlying()
       }
     }
 
-    // double jump in build, mode toggle flying
-    if (this.jumpPressed && this.world.builder?.enabled) {
+    // double jump to toggle flying (works in build mode OR first-person mode without avatar)
+    if (this.jumpPressed && (this.world.builder?.enabled || !this.avatar)) {
       if (this.world.time - this.lastJumpAt < 0.4) {
         this.toggleFlying()
       }
