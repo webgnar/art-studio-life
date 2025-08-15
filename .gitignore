@@ -6,4 +6,5 @@ localstorage.json
 .notes/
 node_modules/
 build/
-/world*
+# Allow world assets but exclude sensitive files
+/world/storage.json
