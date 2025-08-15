@@ -46,7 +46,7 @@ const storage = new Storage(path.join(worldDir, '/storage.json'))
 const world = createServerWorld()
 world.assetsUrl = process.env.PUBLIC_ASSETS_URL
 world.collections.deserialize(collections)
-world.init({ db, storage, assetsDir })
+await world.init({ db, storage, assetsDir })
 
 const fastify = Fastify({ logger: { level: 'error' } })
 
