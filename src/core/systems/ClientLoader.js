@@ -100,11 +100,17 @@ export class ClientLoader extends System {
 
   loadFile = async url => {
     url = this.world.resolveURL(url)
+    console.log('Loading file:', url)
     if (this.files.has(url)) {
       return this.files.get(url)
     }
     const resp = await fetch(url)
+    console.log('Fetch response:', resp.status, resp.headers.get('content-type'))
+    if (!resp.ok) {
+      throw new Error(`Failed to fetch ${url}: ${resp.status} ${resp.statusText}`)
+    }
     const blob = await resp.blob()
+    console.log('Blob type:', blob.type, 'size:', blob.size)
     const file = new File([blob], url.split('/').pop(), { type: blob.type })
     this.files.set(url, file)
     return file
