@@ -197,7 +197,13 @@ try {
 
 async function worldNetwork(fastify) {
   fastify.get('/ws', { websocket: true }, (ws, req) => {
-    world.network.onConnection(ws, req.query)
+    try {
+      console.log('WebSocket connection attempt from:', req.ip)
+      world.network.onConnection(ws, req.query)
+    } catch (error) {
+      console.error('WebSocket connection error:', error)
+      ws.close(1011, 'Server error')
+    }
   })
 }
 

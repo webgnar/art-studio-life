@@ -29,10 +29,13 @@ export class ClientNetwork extends System {
     let url = `${wsUrl}?authToken=${authToken}`
     if (name) url += `&name=${encodeURIComponent(name)}`
     if (avatar) url += `&avatar=${encodeURIComponent(avatar)}`
+    console.log('Connecting to WebSocket:', url)
     this.ws = new WebSocket(url)
     this.ws.binaryType = 'arraybuffer'
     this.ws.addEventListener('message', this.onPacket)
     this.ws.addEventListener('close', this.onClose)
+    this.ws.addEventListener('error', this.onError)
+    this.ws.addEventListener('open', this.onOpen)
   }
 
   preFixedUpdate() {
@@ -212,7 +215,16 @@ export class ClientNetwork extends System {
     this.world.emit('kick', code)
   }
 
-  onClose = code => {
+  onOpen = () => {
+    console.log('WebSocket connected successfully')
+  }
+
+  onError = (error) => {
+    console.error('WebSocket error:', error)
+  }
+
+  onClose = (event) => {
+    console.log('WebSocket closed:', event.code, event.reason)
     this.world.chat.add({
       id: uuid(),
       from: null,
@@ -220,8 +232,7 @@ export class ClientNetwork extends System {
       body: `You have been disconnected.`,
       createdAt: moment().toISOString(),
     })
-    this.world.emit('disconnect', code || true)
-    console.log('disconnect', code)
+    this.world.emit('disconnect', event.code || true)
   }
 
   destroy() {
