@@ -225,11 +225,29 @@ export class ClientNetwork extends System {
 
   onClose = (event) => {
     console.log('WebSocket closed:', event.code, event.reason)
+    
+    // Decode close codes for better debugging
+    let reason = event.reason || 'Unknown'
+    switch(event.code) {
+      case 1000: reason = 'Normal closure'; break;
+      case 1001: reason = 'Going away'; break;
+      case 1002: reason = 'Protocol error'; break;
+      case 1003: reason = 'Unsupported data'; break;
+      case 1006: reason = 'Abnormal closure'; break;
+      case 1011: reason = 'Server error'; break;
+      case 1012: reason = 'Service restart'; break;
+      case 1013: reason = 'Try again later'; break;
+      case 1014: reason = 'Bad gateway'; break;
+      case 1015: reason = 'TLS handshake'; break;
+    }
+    
+    console.log(`WebSocket disconnect reason: ${reason} (code: ${event.code})`)
+    
     this.world.chat.add({
       id: uuid(),
       from: null,
       fromId: null,
-      body: `You have been disconnected.`,
+      body: `Connection lost: ${reason}. Refresh to reconnect.`,
       createdAt: moment().toISOString(),
     })
     this.world.emit('disconnect', event.code || true)
